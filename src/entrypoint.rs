@@ -15,5 +15,5 @@ fn process_instruction(
         accounts.len(),
         instruction_data
     );
-    Processor::process(program_id, accounts, instruction_data);
+    Processor::process(program_id, accounts, instruction_data)
 }
