@@ -3,3 +3,4 @@
 /target/
 .idea
 seed_phrase.txt
+/test-ledger
