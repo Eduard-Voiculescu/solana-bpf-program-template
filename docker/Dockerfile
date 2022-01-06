@@ -2,10 +2,13 @@
 # ci/rust-version.sh to pick up the new image tag
 FROM rust:1.57.0
 
+# Set user as root
+USER root
+
 # Add Google Protocol Buffers for Libra's metrics library.
 ENV PROTOC_VERSION 3.8.0
 ENV PROTOC_ZIP protoc-$PROTOC_VERSION-linux-x86_64.zip
-ENV USER solana-bpf
+ENV USER root
 
 RUN set -x \
  && apt update \
@@ -47,17 +50,11 @@ RUN set -x \
  && unzip -o $PROTOC_ZIP -d /usr/local include/* \
  && rm -f $PROTOC_ZIP
 
-# Create new user
-RUN useradd -ms /bin/bash $USER
-
-# Set as new user
-USER $USER
-
 # Install the solana dev tools
 RUN sh -c "$(curl -sSfL https://release.solana.com/v1.9.2/install)"
 
 # Update PATH to take in account the new installation of solana
-ENV PATH="/home/$USER/.local/share/solana/install/active_release/bin:$PATH"
+ENV PATH="/$USER/.local/share/solana/install/active_release/bin:$PATH"
 
 # Set working directory
 WORKDIR /home/$USER
@@ -71,5 +68,8 @@ COPY src ./solana-bpf-program-template/src
 # Copy Cargo.toml file
 COPY Cargo.toml ./solana-bpf-program-template
 
-# Compile code
-RUN cd ./solana-bpf-program-template && cargo check
+# Add start up shell script
+COPY docker/start.sh ./
+
+# Run start up script
+ENTRYPOINT ["./start.sh"]
